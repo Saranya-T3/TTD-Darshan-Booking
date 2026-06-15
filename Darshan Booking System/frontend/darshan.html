@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Book Darshan — TTD</title>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+
+<div class="page-hero">
+  <h1>🛕 Book Darshan</h1>
+  <p>Select your preferred date, darshan type and time slot</p>
+</div>
+
+<section class="section" style="padding:2rem 1rem;">
+  <div class="container">
+
+    <!-- STEP WIZARD -->
+    <div class="steps mb-3" id="stepWizard">
+      <div class="step active" id="sw1"><div class="step-num">1</div><div class="step-lbl">Select Slot</div></div>
+      <div class="step" id="sw2"><div class="step-num">2</div><div class="step-lbl">Pilgrim Details</div></div>
+      <div class="step" id="sw3"><div class="step-num">3</div><div class="step-lbl">Payment</div></div>
+      <div class="step" id="sw4"><div class="step-num">4</div><div class="step-lbl">Confirmed</div></div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         STEP 1 — Choose Date, Type, Slot
+    ══════════════════════════════════════════════════════ -->
+    <div id="step1">
+      <div class="form-box xl" style="width:100%;">
+        <div id="alertS1" class="alert"></div>
+
+        <div class="f-row mb-2">
+          <!-- DATE -->
+          <div class="f-group">
+            <label>Select Date <span class="req">*</span></label>
+            <input type="date" id="pickDate" class="f-ctrl" onchange="loadSlots()"/>
+          </div>
+          <!-- DARSHAN TYPE -->
+          <div class="f-group">
+            <label>Darshan Type <span class="req">*</span></label>
+            <select id="pickType" class="f-ctrl" onchange="loadSlots()">
+              <option value="">— Loading... —</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="f-row mb-2">
+          <!-- SLOT TYPE -->
+          <div class="f-group">
+            <label>Category</label>
+            <select id="pickCategory" class="f-ctrl" onchange="loadSlots()">
+              <option value="">All</option>
+              <option value="indian">Indian</option>
+              <option value="nri">NRI</option>
+            </select>
+          </div>
+          <!-- PERSONS -->
+          <div class="f-group">
+            <label>Number of Persons <span class="req">*</span></label>
+            <input type="number" id="numPersons" class="f-ctrl" min="1" max="6" value="1" placeholder="1"/>
+          </div>
+        </div>
+
+        <!-- SLOTS GRID -->
+        <div id="slotsSection" class="d-none">
+          <label style="font-size:0.82rem;font-weight:600;display:block;margin-bottom:0.7rem;">Available Time Slots</label>
+          <div id="slotsGrid" class="slot-grid"></div>
+        </div>
+        <div id="slotsEmpty" class="no-data d-none">
+          <div class="nd-icon">📅</div>
+          <p>No slots available for selected date and type. Please try a different date.</p>
+        </div>
+        <div id="slotsLoading" class="no-data d-none">
+          <div class="nd-icon" style="animation:spin 1s linear infinite;display:inline-block;">⏳</div>
+          <p>Loading slots...</p>
+        </div>
+
+        <div class="text-center mt-3">
+          <button class="btn btn-red" onclick="goStep2()">
+            Continue to Pilgrim Details →
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         STEP 2 — Pilgrim Details
+    ══════════════════════════════════════════════════════ -->
+    <div id="step2" class="d-none">
+      <div class="form-box xl" style="width:100%;">
+        <div id="alertS2" class="alert"></div>
+
+        <!-- Booking summary -->
+        <div style="background:#fff9f0;border:1px solid var(--border);border-radius:8px;padding:1rem;margin-bottom:1.3rem;font-size:0.84rem;">
+          <div class="flex-between mb-1">
+            <span class="text-muted">Darshan Type:</span>
+            <span class="fw-600 text-red" id="sumType"></span>
+          </div>
+          <div class="flex-between mb-1">
+            <span class="text-muted">Date &amp; Time:</span>
+            <span class="fw-600" id="sumSlot"></span>
+          </div>
+          <div class="flex-between mb-1">
+            <span class="text-muted">Persons:</span>
+            <span class="fw-600" id="sumPersons"></span>
+          </div>
+          <div class="flex-between">
+            <span class="text-muted">Total Amount:</span>
+            <span class="fw-700 text-red" id="sumAmount"></span>
+          </div>
+        </div>
+
+        <label style="font-size:0.85rem;font-weight:700;color:var(--red);display:block;margin-bottom:0.8rem;">Enter Details for Each Pilgrim</label>
+        <div id="pilgrimsContainer"></div>
+
+        <!-- Booking type -->
+        <div class="f-group mt-2">
+          <label>Booking Category <span class="req">*</span></label>
+          <select id="bookingType" class="f-ctrl">
+            <option value="indian">Indian</option>
+            <option value="nri">NRI</option>
+          </select>
+        </div>
+
+        <div class="flex gap-2 mt-2" style="flex-wrap:wrap;">
+          <button class="btn btn-outline-red" onclick="goStep1()">← Back</button>
+          <button id="bookBtn" class="btn btn-red" onclick="submitBooking()">
+            <span class="btn-text">Submit &amp; Proceed to Payment →</span>
+            <div class="spin" style="border-top-color:white;"></div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         STEP 3 — Payment
+    ══════════════════════════════════════════════════════ -->
+    <div id="step3" class="d-none">
+      <div class="form-box" style="width:100%;">
+        <div id="alertS3" class="alert"></div>
+
+        <div class="pay-summary">
+          <h4>Payment Summary</h4>
+          <div class="pay-row"><span>Darshan Type</span><span id="payType"></span></div>
+          <div class="pay-row"><span>Date &amp; Slot</span><span id="paySlot"></span></div>
+          <div class="pay-row"><span>Persons</span><span id="payPersons"></span></div>
+          <div class="pay-row"><span>Price per person</span><span id="payPrice"></span></div>
+          <div class="pay-row total"><span>TOTAL</span><span id="payTotal"></span></div>
+        </div>
+
+        <label style="font-size:0.82rem;font-weight:700;display:block;margin-bottom:0.7rem;">Select Payment Method</label>
+        <div class="pay-methods" id="payMethods">
+          <div class="pay-method" onclick="selMethod('upi',this)"><span class="pm-icon">📱</span>UPI</div>
+          <div class="pay-method" onclick="selMethod('netbanking',this)"><span class="pm-icon">🏦</span>Net Banking</div>
+          <div class="pay-method" onclick="selMethod('debit_card',this)"><span class="pm-icon">💳</span>Debit Card</div>
+          <div class="pay-method" onclick="selMethod('credit_card',this)"><span class="pm-icon">💳</span>Credit Card</div>
+          <div class="pay-method" onclick="selMethod('wallet',this)"><span class="pm-icon">👝</span>Wallet</div>
+        </div>
+
+        <div class="f-group" id="upiField" style="display:none;">
+          <label>UPI ID</label>
+          <input type="text" id="upiId" class="f-ctrl" placeholder="yourname@upi"/>
+        </div>
+
+        <div class="flex gap-2 mt-2" style="flex-wrap:wrap;">
+          <button class="btn btn-outline-red" onclick="goStep2()">← Back</button>
+          <button id="payBtn" class="btn btn-green" onclick="doPayment()">
+            <span class="btn-text">Pay Now 🔒</span>
+            <div class="spin" style="border-top-color:white;"></div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         STEP 4 — Confirmed
+    ══════════════════════════════════════════════════════ -->
+    <div id="step4" class="d-none">
+      <div class="form-box" style="width:100%;text-align:center;">
+        <div style="font-size:4rem;margin-bottom:1rem;">🎉</div>
+        <h2 style="font-family:'Cinzel',serif;color:var(--red);margin-bottom:0.5rem;">Booking Confirmed!</h2>
+        <p style="color:var(--muted);font-size:0.88rem;margin-bottom:1.5rem;">
+          Your darshan has been booked successfully. Please carry a printed copy or screenshot.
+        </p>
+        <div style="background:#fff9f0;border:1px solid var(--border);border-radius:8px;padding:1.2rem;text-align:left;margin-bottom:1.5rem;font-size:0.84rem;">
+          <div class="flex-between mb-1"><span class="text-muted">Booking Reference</span><span class="fw-700 text-red" id="confRef"></span></div>
+          <div class="flex-between mb-1"><span class="text-muted">Transaction ID</span><span class="fw-600" id="confTxn"></span></div>
+          <div class="flex-between mb-1"><span class="text-muted">Darshan Type</span><span class="fw-600" id="confType"></span></div>
+          <div class="flex-between mb-1"><span class="text-muted">Date &amp; Slot</span><span class="fw-600" id="confSlot"></span></div>
+          <div class="flex-between mb-1"><span class="text-muted">Persons</span><span class="fw-600" id="confPersons"></span></div>
+          <div class="flex-between"><span class="text-muted">Amount Paid</span><span class="fw-700 text-red" id="confAmount"></span></div>
+        </div>
+        <div class="flex gap-2" style="justify-content:center;flex-wrap:wrap;">
+          <a href="dashboard.html" class="btn btn-red">View My Bookings</a>
+          <button class="btn btn-outline-red" onclick="resetForm()">Book Another</button>
+        </div>
+        <p style="margin-top:1rem;font-size:1.5rem;color:var(--gold-dk);">ॐ नमो वेङ्कटेशाय 🙏</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand"><h3>🛕 TTD</h3><p>Tirumala Tirupati Devasthanams.</p></div>
+    <div class="footer-col"><h4>Links</h4><ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="accommodation.html">Accommodation</a></li>
+      <li><a href="donation.html">Donate</a></li>
+    </ul></div>
+  </div>
+  <div class="footer-bottom"><span>© 2025 TTD</span></div>
+</footer>
+
+<script src="js/nav.js"></script>
+<script src="js/main.js"></script>
+<script>
+// ── State ─────────────────────────────────────────────────
+let allSlots     = [];
+let selectedSlot = null;
+let bookingData  = {};   // holds booking_id, booking_reference, total_amount
+let selPayMethod = null;
+
+// ── On load ───────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+  requireLogin();
+
+  // Set min date to today
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('pickDate').min = today;
+
+  // Load darshan types
+  try {
+    const data = await api('GET', '/darshan-types');
+    if (data.success) {
+      const sel = document.getElementById('pickType');
+      sel.innerHTML = '<option value="">— Select Type —</option>';
+      data.types.forEach(t => {
+        sel.innerHTML += `<option value="${t.darshan_type_id}" data-price="${t.price}">
+          ${t.darshan_name} — ${t.price == 0 ? 'FREE' : '₹' + Number(t.price).toLocaleString('en-IN')}
+        </option>`;
+      });
+    }
+  } catch { showAlert('alertS1', 'Failed to load darshan types.'); }
+});
+
+// ── Load slots ────────────────────────────────────────────
+async function loadSlots() {
+  const date     = document.getElementById('pickDate').value;
+  const typeId   = document.getElementById('pickType').value;
+  const category = document.getElementById('pickCategory').value;
+
+  if (!date || !typeId) return;
+
+  selectedSlot = null;
+  document.getElementById('slotsSection').classList.add('d-none');
+  document.getElementById('slotsEmpty').classList.add('d-none');
+  document.getElementById('slotsLoading').classList.remove('d-none');
+
+  try {
+    let url = `/timeslots?date=${date}&darshan_type_id=${typeId}`;
+    if (category) url += `&slot_type=${category}`;
+    const data = await api('GET', url);
+
+    document.getElementById('slotsLoading').classList.add('d-none');
+
+    if (!data.success || !data.slots.length) {
+      document.getElementById('slotsEmpty').classList.remove('d-none');
+      return;
+    }
+
+    allSlots = data.slots;
+    renderSlots();
+    document.getElementById('slotsSection').classList.remove('d-none');
+  } catch {
+    document.getElementById('slotsLoading').classList.add('d-none');
+    showAlert('alertS1', 'Failed to load slots. Is backend running?');
+  }
+}
+
+function renderSlots() {
+  const grid = document.getElementById('slotsGrid');
+  grid.innerHTML = '';
+  allSlots.forEach(s => {
+    const pct  = Math.round((s.booked_count / s.max_capacity) * 100);
+    const full = s.available_seats <= 0;
+    const sel  = selectedSlot && selectedSlot.time_slot_id === s.time_slot_id;
+    grid.innerHTML += `
+      <div class="slot-card ${full ? 'slot-full' : ''} ${sel ? 'selected' : ''}"
+           onclick="${full ? '' : 'selectSlot(' + s.time_slot_id + ')'}"
+           data-id="${s.time_slot_id}">
+        <span class="slot-price">${s.price == 0 ? 'FREE' : '₹' + Number(s.price).toLocaleString('en-IN')}</span>
+        <div class="slot-time">${fTime(s.start_time)} – ${fTime(s.end_time)}</div>
+        <span class="slot-type-badge">${s.slot_type.toUpperCase()}</span>
+        <div class="slot-bar"><div class="slot-fill" style="width:${pct}%"></div></div>
+        <div class="slot-info">
+          ${full ? '❌ Full' : `✅ ${s.available_seats} seats left`} / ${s.max_capacity} total
+        </div>
+      </div>`;
+  });
+}
+
+function selectSlot(id) {
+  selectedSlot = allSlots.find(s => s.time_slot_id === id);
+  renderSlots();
+}
+
+// ── Step navigation ───────────────────────────────────────
+function setStep(n) {
+  [1,2,3,4].forEach(i => {
+    document.getElementById('step' + i).classList.toggle('d-none', i !== n);
+    const sw = document.getElementById('sw' + i);
+    sw.classList.remove('active','done');
+    if (i < n)  sw.classList.add('done');
+    if (i === n) sw.classList.add('active');
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function goStep1() { setStep(1); }
+
+function goStep2() {
+  // Validation
+  if (!selectedSlot)  return showAlert('alertS1', 'Please select a time slot.');
+  const n = parseInt(document.getElementById('numPersons').value);
+  if (!n || n < 1 || n > 6) return showAlert('alertS1', 'Enter number of persons (1–6).');
+  if (n > selectedSlot.available_seats) {
+    return showAlert('alertS1', `Only ${selectedSlot.available_seats} seat(s) available.`);
+  }
+
+  // Fill summary
+  document.getElementById('sumType').textContent    = selectedSlot.darshan_name;
+  document.getElementById('sumSlot').textContent    = `${fDate(selectedSlot.darshan_date)} | ${fTime(selectedSlot.start_time)} – ${fTime(selectedSlot.end_time)}`;
+  document.getElementById('sumPersons').textContent = n;
+  document.getElementById('sumAmount').textContent  = selectedSlot.price == 0 ? 'FREE' : fMoney(selectedSlot.price * n);
+
+  // Build pilgrim forms
+  const container = document.getElementById('pilgrimsContainer');
+  container.innerHTML = '';
+  for (let i = 1; i <= n; i++) {
+    container.innerHTML += `
+      <div class="pilgrim-block">
+        <h4>Pilgrim ${i}</h4>
+        <div class="f-row">
+          <div class="f-group">
+            <label>Full Name <span class="req">*</span></label>
+            <input type="text" class="f-ctrl p-name" placeholder="Full name" data-i="${i}"/>
+          </div>
+          <div class="f-row" style="grid-template-columns:1fr 1fr;">
+            <div class="f-group">
+              <label>Age <span class="req">*</span></label>
+              <input type="number" class="f-ctrl p-age" min="1" max="110" placeholder="Age" data-i="${i}"/>
+            </div>
+            <div class="f-group">
+              <label>Gender <span class="req">*</span></label>
+              <select class="f-ctrl p-gender" data-i="${i}">
+                <option value="">Select</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="f-row">
+          <div class="f-group">
+            <label>Aadhar Number</label>
+            <input type="text" class="f-ctrl p-aadhar" maxlength="12" placeholder="12-digit Aadhar" data-i="${i}"/>
+          </div>
+          <div class="f-group">
+            <label>Passport Number</label>
+            <input type="text" class="f-ctrl p-passport" maxlength="8" placeholder="e.g. A1234567" data-i="${i}"/>
+          </div>
+        </div>
+        <div class="f-hint">Provide Aadhar <strong>or</strong> Passport (at least one required)</div>
+      </div>`;
+  }
+  setStep(2);
+}
+
+async function submitBooking() {
+  if (!requireLogin()) return;
+
+  const n = parseInt(document.getElementById('numPersons').value);
+  const bookingType = document.getElementById('bookingType').value;
+
+  // Collect pilgrims
+  const pilgrims = [];
+  const nameEls   = document.querySelectorAll('.p-name');
+  const ageEls    = document.querySelectorAll('.p-age');
+  const genderEls = document.querySelectorAll('.p-gender');
+  const aadharEls = document.querySelectorAll('.p-aadhar');
+  const passprEls = document.querySelectorAll('.p-passport');
+
+  for (let i = 0; i < n; i++) {
+    const name    = nameEls[i].value.trim();
+    const age     = parseInt(ageEls[i].value);
+    const gender  = genderEls[i].value;
+    const aadhar  = aadharEls[i].value.trim();
+    const passport= passprEls[i].value.trim().toUpperCase();
+
+    if (!name || !age || !gender) return showAlert('alertS2', `Fill name, age and gender for Pilgrim ${i+1}.`);
+    if (!aadhar && !passport) return showAlert('alertS2', `Pilgrim ${i+1}: Aadhar or Passport number is required.`);
+    if (aadhar && aadhar.length !== 12) return showAlert('alertS2', `Pilgrim ${i+1}: Aadhar must be 12 digits.`);
+
+    pilgrims.push({
+      pilgrim_name:    name,
+      age:             age,
+      gender:          gender,
+      aadhar_number:   aadhar  || null,
+      passport_number: passport || null,
+      country:         bookingType === 'nri' ? 'NRI' : 'India'
+    });
+  }
+
+  btnLoading('bookBtn', true, 'Creating Booking...');
+  try {
+    const data = await api('POST', '/bookings/darshan', {
+      time_slot_id:      selectedSlot.time_slot_id,
+      number_of_persons: n,
+      booking_type:      bookingType,
+      pilgrims
+    });
+
+    if (data.success) {
+      bookingData = data;
+      // Populate payment step
+      document.getElementById('payType').textContent    = selectedSlot.darshan_name;
+      document.getElementById('paySlot').textContent    = `${fDate(selectedSlot.darshan_date)} | ${fTime(selectedSlot.start_time)}`;
+      document.getElementById('payPersons').textContent = n;
+      document.getElementById('payPrice').textContent   = selectedSlot.price == 0 ? 'FREE' : fMoney(selectedSlot.price);
+      document.getElementById('payTotal').textContent   = selectedSlot.price == 0 ? 'FREE' : fMoney(data.total_amount);
+      setStep(3);
+    } else {
+      showAlert('alertS2', data.message || 'Booking failed.');
+    }
+  } catch {
+    showAlert('alertS2', 'Network error. Please try again.');
+  } finally {
+    btnLoading('bookBtn', false, 'Submit & Proceed to Payment →');
+  }
+}
+
+// ── Payment ───────────────────────────────────────────────
+function selMethod(method, el) {
+  selPayMethod = method;
+  document.querySelectorAll('.pay-method').forEach(e => e.classList.remove('sel'));
+  el.classList.add('sel');
+  document.getElementById('upiField').style.display = method === 'upi' ? 'block' : 'none';
+}
+
+async function doPayment() {
+  if (!requireLogin()) return;
+
+  // Free darshan — skip payment API but still confirm
+  const isFree = Number(selectedSlot.price) === 0;
+
+  if (!isFree && !selPayMethod) return showAlert('alertS3', 'Please select a payment method.');
+
+  const amount = isFree ? 0 : Number(bookingData.total_amount);
+
+  btnLoading('payBtn', true, 'Processing...');
+  try {
+    let txnId;
+    if (isFree) {
+      // Just confirm booking directly with amount 0
+      const data = await api('POST', '/payment', {
+        booking_id:     bookingData.booking_id,
+        amount:         0.01, // minimum non-zero to avoid DB constraint
+        payment_method: 'upi'
+      });
+      if (!data.success) { showAlert('alertS3', data.message || 'Confirmation failed.'); return; }
+      txnId = data.transaction_id;
+    } else {
+      const data = await api('POST', '/payment', {
+        booking_id:     bookingData.booking_id,
+        amount:         amount,
+        payment_method: selPayMethod
+      });
+      if (!data.success) { showAlert('alertS3', data.message || 'Payment failed.'); return; }
+      txnId = data.transaction_id;
+    }
+
+    // Populate confirmation
+    document.getElementById('confRef').textContent     = bookingData.booking_reference;
+    document.getElementById('confTxn').textContent     = txnId;
+    document.getElementById('confType').textContent    = selectedSlot.darshan_name;
+    document.getElementById('confSlot').textContent    = `${fDate(selectedSlot.darshan_date)} | ${fTime(selectedSlot.start_time)} – ${fTime(selectedSlot.end_time)}`;
+    document.getElementById('confPersons').textContent = document.getElementById('numPersons').value;
+    document.getElementById('confAmount').textContent  = isFree ? 'FREE' : fMoney(amount);
+    setStep(4);
+  } catch {
+    showAlert('alertS3', 'Payment error. Please try again.');
+  } finally {
+    btnLoading('payBtn', false, 'Pay Now 🔒');
+  }
+}
+
+function resetForm() {
+  selectedSlot = null; bookingData = {}; selPayMethod = null;
+  document.getElementById('pickDate').value   = '';
+  document.getElementById('pickType').value   = '';
+  document.getElementById('numPersons').value = 1;
+  document.getElementById('slotsSection').classList.add('d-none');
+  document.getElementById('slotsEmpty').classList.add('d-none');
+  setStep(1);
+}
+</script>
+</body>
+</html>

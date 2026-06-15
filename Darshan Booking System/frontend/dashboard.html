@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>My Dashboard — TTD</title>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+
+<div class="dash-wrap">
+
+  <!-- ── SIDEBAR ─────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-profile">
+      <div class="sidebar-avatar" id="sideAvatar">👤</div>
+      <h4 id="sideName">Loading...</h4>
+      <p id="sideEmail"></p>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="#" class="active" onclick="showTab('overview',this)"><span class="ni">📊</span> Overview</a></li>
+      <li><a href="#" onclick="showTab('darshan',this)"><span class="ni">🛕</span> Darshan Bookings</a></li>
+      <li><a href="#" onclick="showTab('rooms',this)"><span class="ni">🏨</span> Room Bookings</a></li>
+      <li><a href="#" onclick="showTab('payments',this)"><span class="ni">💳</span> Payments</a></li>
+      <li><a href="#" onclick="showTab('donations',this)"><span class="ni">💛</span> Donations</a></li>
+      <li><a href="#" onclick="showTab('profile',this)"><span class="ni">👤</span> My Profile</a></li>
+      <li style="margin-top:1rem;border-top:1px solid rgba(255,255,255,0.12);padding-top:0.8rem;">
+        <a href="#" onclick="logout()"><span class="ni">🚪</span> Logout</a>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- ── MAIN ───────────────────────────────────────────── -->
+  <main class="dash-main">
+
+    <!-- ─── OVERVIEW ──────────────────────────────────── -->
+    <div id="tab-overview">
+      <h2 style="font-family:'Cinzel',serif;color:var(--red);margin-bottom:1.4rem;">Welcome back 🙏 <span id="greetName"></span></h2>
+
+      <div class="dash-stats" id="statsGrid">
+        <div class="stat-box"><div class="stat-ico c1">🛕</div><div><div class="stat-val" id="st-darshan">—</div><div class="stat-lbl">Darshan Bookings</div></div></div>
+        <div class="stat-box"><div class="stat-ico c2">🏨</div><div><div class="stat-val" id="st-rooms">—</div><div class="stat-lbl">Room Bookings</div></div></div>
+        <div class="stat-box"><div class="stat-ico c3">💳</div><div><div class="stat-val" id="st-payments">—</div><div class="stat-lbl">Payments Made</div></div></div>
+        <div class="stat-box"><div class="stat-ico c4">💛</div><div><div class="stat-val" id="st-donations">—</div><div class="stat-lbl">Total Donated</div></div></div>
+      </div>
+
+      <!-- Recent Darshan Bookings -->
+      <div class="tbl-box mb-3">
+        <div class="tbl-head">
+          <h3>Recent Darshan Bookings</h3>
+          <a href="#" onclick="showTab('darshan')" style="font-size:0.8rem;color:var(--red);">View All →</a>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th>Reference</th><th>Date</th><th>Type</th><th>Persons</th><th>Amount</th><th>Status</th>
+            </tr></thead>
+            <tbody id="recentDarshan"><tr><td colspan="6" class="no-data">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="grid-3">
+        <a href="darshan.html" class="card" style="text-align:center;cursor:pointer;text-decoration:none;">
+          <div style="font-size:2rem;margin-bottom:0.5rem;">🛕</div>
+          <div style="font-weight:600;color:var(--red);font-size:0.9rem;">Book Darshan</div>
+          <div style="font-size:0.78rem;color:var(--muted);margin-top:0.3rem;">Choose a time slot</div>
+        </a>
+        <a href="accommodation.html" class="card" style="text-align:center;cursor:pointer;">
+          <div style="font-size:2rem;margin-bottom:0.5rem;">🏨</div>
+          <div style="font-weight:600;color:var(--red);font-size:0.9rem;">Book Room</div>
+          <div style="font-size:0.78rem;color:var(--muted);margin-top:0.3rem;">Guest house accommodation</div>
+        </a>
+        <a href="donation.html" class="card" style="text-align:center;cursor:pointer;">
+          <div style="font-size:2rem;margin-bottom:0.5rem;">💛</div>
+          <div style="font-weight:600;color:var(--red);font-size:0.9rem;">Make a Donation</div>
+          <div style="font-size:0.78rem;color:var(--muted);margin-top:0.3rem;">Support TTD causes</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- ─── DARSHAN BOOKINGS ───────────────────────────── -->
+    <div id="tab-darshan" class="d-none">
+      <div class="flex-between mb-3">
+        <h2 style="font-family:'Cinzel',serif;color:var(--red);">🛕 Darshan Bookings</h2>
+        <a href="darshan.html" class="btn btn-red btn-sm">+ New Booking</a>
+      </div>
+      <div class="tbl-box">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th>Reference</th><th>Darshan Type</th><th>Date</th><th>Time</th>
+              <th>Category</th><th>Persons</th><th>Amount</th><th>Status</th><th>Action</th>
+            </tr></thead>
+            <tbody id="darshanTbody"><tr><td colspan="9" class="no-data">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── ROOM BOOKINGS ──────────────────────────────── -->
+    <div id="tab-rooms" class="d-none">
+      <div class="flex-between mb-3">
+        <h2 style="font-family:'Cinzel',serif;color:var(--red);">🏨 Room Bookings</h2>
+        <a href="accommodation.html" class="btn btn-red btn-sm">+ Book Room</a>
+      </div>
+      <div class="tbl-box">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th>Room Type</th><th>Check-in</th><th>Check-out</th>
+              <th>Nights</th><th>Total</th><th>Status</th><th>Action</th>
+            </tr></thead>
+            <tbody id="roomTbody"><tr><td colspan="7" class="no-data">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── PAYMENTS ───────────────────────────────────── -->
+    <div id="tab-payments" class="d-none">
+      <h2 style="font-family:'Cinzel',serif;color:var(--red);margin-bottom:1.4rem;">💳 Payment History</h2>
+      <div class="tbl-box">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th>Transaction ID</th><th>Date</th><th>Type</th>
+              <th>For</th><th>Amount</th><th>Method</th><th>Status</th>
+            </tr></thead>
+            <tbody id="paymentTbody"><tr><td colspan="7" class="no-data">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── DONATIONS ──────────────────────────────────── -->
+    <div id="tab-donations" class="d-none">
+      <div class="flex-between mb-3">
+        <h2 style="font-family:'Cinzel',serif;color:var(--red);">💛 My Donations</h2>
+        <a href="donation.html" class="btn btn-gold btn-sm" style="color:var(--red-dk);">+ Donate</a>
+      </div>
+      <div class="tbl-box">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th>Donation ID</th><th>Date</th><th>Type</th><th>Amount</th>
+            </tr></thead>
+            <tbody id="donationTbody"><tr><td colspan="4" class="no-data">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── PROFILE ────────────────────────────────────── -->
+    <div id="tab-profile" class="d-none">
+      <h2 style="font-family:'Cinzel',serif;color:var(--red);margin-bottom:1.4rem;">👤 My Profile</h2>
+      <div class="form-box wide" style="width:100%;">
+        <div id="profileAlert" class="alert"></div>
+        <div id="profileLoading" style="text-align:center;padding:2rem;color:var(--muted);">Loading...</div>
+        <div id="profileContent" class="d-none">
+          <div class="grid-2" style="font-size:0.84rem;gap:1.2rem;margin-bottom:1.5rem;">
+            <div style="background:#fff9f0;border:1px solid var(--border);border-radius:8px;padding:1rem;">
+              <div style="font-size:0.72rem;color:var(--muted);margin-bottom:0.2rem;">FULL NAME</div>
+              <div class="fw-600" id="pName"></div>
+            </div>
+            <div style="background:#fff9f0;border:1px solid var(--border);border-radius:8px;padding:1rem;">
+              <div style="font-size:0.72rem;color:var(--muted);margin-bottom:0.2rem;">EMAIL</div>
+              <div class="fw-600" id="pEmail"></div>
+            </div>
+            <div style="background:#fff9f0;border:1px solid var(--border);border-radius:8px;padding:1rem;">
+              <div style="font-size:0.72rem;color:var(--muted);margin-bottom:0.2rem;">PHONE</div>
+              <div class="fw-600" id="pPhone"></div>
+            </div>
+            <div style="background:#fff9f0;border:1px solid var(--border);border-radius:8px;padding:1rem;">
+              <div style="font-size:0.72rem;color:var(--muted);margin-bottom:0.2rem;">COUNTRY</div>
+              <div class="fw-600" id="pCountry"></div>
+            </div>
+            <div style="background:#fff9f0;border:1px solid var(--border);border-radius:8px;padding:1rem;">
+              <div style="font-size:0.72rem;color:var(--muted);margin-bottom:0.2rem;">AADHAR</div>
+              <div class="fw-600" id="pAadhar"></div>
+            </div>
+            <div style="background:#fff9f0;border:1px solid var(--border);border-radius:8px;padding:1rem;">
+              <div style="font-size:0.72rem;color:var(--muted);margin-bottom:0.2rem;">PASSPORT</div>
+              <div class="fw-600" id="pPassport"></div>
+            </div>
+            <div style="background:#fff9f0;border:1px solid var(--border);border-radius:8px;padding:1rem;">
+              <div style="font-size:0.72rem;color:var(--muted);margin-bottom:0.2rem;">ACCOUNT STATUS</div>
+              <div class="fw-600" id="pStatus"></div>
+            </div>
+            <div style="background:#fff9f0;border:1px solid var(--border);border-radius:8px;padding:1rem;">
+              <div style="font-size:0.72rem;color:var(--muted);margin-bottom:0.2rem;">MEMBER SINCE</div>
+              <div class="fw-600" id="pSince"></div>
+            </div>
+          </div>
+          <div style="background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:0.8rem;font-size:0.82rem;color:#664d03;">
+            ℹ️ To update your profile details, please contact TTD helpdesk at 1800-425-1111.
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- CANCEL MODAL -->
+<div class="modal-overlay" id="cancelModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title">Cancel Booking</div>
+    <p style="font-size:0.88rem;color:var(--muted);margin-bottom:1.3rem;" id="cancelMsg">
+      Are you sure you want to cancel this booking? This action cannot be undone.
+    </p>
+    <div class="flex gap-2">
+      <button class="btn btn-outline-red" onclick="closeModal()">No, Keep It</button>
+      <button id="confirmCancelBtn" class="btn btn-danger" onclick="confirmCancel()">
+        <span class="btn-text">Yes, Cancel</span>
+        <div class="spin" style="border-top-color:white;"></div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="js/nav.js"></script>
+<script src="js/main.js"></script>
+<script>
+// ── State ─────────────────────────────────────────────────
+let cancelTarget = null;   // { type:'darshan'|'room', id }
+const tabs = ['overview','darshan','rooms','payments','donations','profile'];
+
+// ── Init ─────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+  if (!requireLogin()) return;
+  const user = getUser();
+  document.getElementById('sideName').textContent  = user.name;
+  document.getElementById('sideEmail').textContent = user.email;
+  document.getElementById('sideAvatar').textContent= user.name.charAt(0).toUpperCase();
+  document.getElementById('greetName').textContent = user.name.split(' ')[0];
+  await loadAll();
+});
+
+// ── Tab switching ─────────────────────────────────────────
+function showTab(name, el) {
+  tabs.forEach(t => document.getElementById('tab-' + t).classList.toggle('d-none', t !== name));
+  document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
+  if (el) el.classList.add('active');
+  if (name === 'profile') loadProfile();
+  return false;
+}
+
+// ── Load everything in parallel ───────────────────────────
+async function loadAll() {
+  await Promise.all([loadDarshan(), loadRooms(), loadPayments(), loadDonations()]);
+}
+
+// ── DARSHAN BOOKINGS ──────────────────────────────────────
+async function loadDarshan() {
+  try {
+    const data = await api('GET', '/bookings/darshan');
+    if (!data.success) return;
+    const list = data.bookings;
+
+    document.getElementById('st-darshan').textContent = list.length;
+
+    // Recent (overview tab — last 3)
+    const rTbody = document.getElementById('recentDarshan');
+    if (!list.length) {
+      rTbody.innerHTML = '<tr><td colspan="6" class="no-data">No darshan bookings yet. <a href="darshan.html" style="color:var(--red);">Book now</a></td></tr>';
+    } else {
+      rTbody.innerHTML = list.slice(0,3).map(b => `
+        <tr>
+          <td class="fw-600 text-red">${b.booking_reference || '—'}</td>
+          <td>${fDate(b.darshan_date)}</td>
+          <td style="max-width:140px;font-size:0.8rem;">${b.darshan_name}</td>
+          <td>${b.number_of_persons}</td>
+          <td>${b.total_amount == 0 ? 'FREE' : fMoney(b.total_amount)}</td>
+          <td>${badgeBs(b.booking_status)}</td>
+        </tr>`).join('');
+    }
+
+    // Full darshan tab
+    const tbody = document.getElementById('darshanTbody');
+    if (!list.length) {
+      tbody.innerHTML = '<tr><td colspan="9" class="no-data"><div class="nd-icon">🛕</div>No darshan bookings yet. <a href="darshan.html" style="color:var(--red);">Book now →</a></td></tr>';
+    } else {
+      tbody.innerHTML = list.map(b => `
+        <tr>
+          <td class="fw-700 text-red">${b.booking_reference || '—'}</td>
+          <td style="font-size:0.8rem;">${b.darshan_name}</td>
+          <td>${fDate(b.darshan_date)}</td>
+          <td>${fTime(b.start_time)} – ${fTime(b.end_time)}</td>
+          <td><span class="badge ${b.booking_type==='nri'?'badge-nri':'badge-indian'}">${b.booking_type.toUpperCase()}</span></td>
+          <td>${b.number_of_persons}</td>
+          <td>${b.total_amount == 0 ? '<span style="color:var(--green);font-weight:600;">FREE</span>' : fMoney(b.total_amount)}</td>
+          <td>${badgeBs(b.booking_status)}</td>
+          <td>
+            ${b.booking_status !== 'cancelled'
+              ? `<button class="btn btn-danger btn-sm" onclick="askCancel('darshan',${b.booking_id},'${b.booking_reference}')">Cancel</button>`
+              : '<span style="font-size:0.75rem;color:var(--muted);">—</span>'}
+          </td>
+        </tr>`).join('');
+    }
+  } catch { console.error('Failed to load darshan bookings'); }
+}
+
+// ── ROOM BOOKINGS ─────────────────────────────────────────
+async function loadRooms() {
+  try {
+    const data = await api('GET', '/bookings/room');
+    if (!data.success) return;
+    const list = data.bookings;
+
+    document.getElementById('st-rooms').textContent = list.length;
+
+    const tbody = document.getElementById('roomTbody');
+    if (!list.length) {
+      tbody.innerHTML = '<tr><td colspan="7" class="no-data"><div class="nd-icon">🏨</div>No room bookings yet. <a href="accommodation.html" style="color:var(--red);">Book now →</a></td></tr>';
+    } else {
+      tbody.innerHTML = list.map(b => `
+        <tr>
+          <td class="fw-600">${b.room_type}</td>
+          <td>${fDate(b.check_in_date)}</td>
+          <td>${fDate(b.check_out_date)}</td>
+          <td>${b.nights} night${b.nights>1?'s':''}</td>
+          <td class="fw-600 text-red">${fMoney(b.total_amount)}</td>
+          <td>${badgeBs(b.booking_status)}</td>
+          <td>
+            ${b.booking_status !== 'cancelled'
+              ? `<button class="btn btn-danger btn-sm" onclick="askCancel('room',${b.room_booking_id},'Room booking')">Cancel</button>`
+              : '<span style="font-size:0.75rem;color:var(--muted);">—</span>'}
+          </td>
+        </tr>`).join('');
+    }
+  } catch { console.error('Failed to load room bookings'); }
+}
+
+// ── PAYMENTS ──────────────────────────────────────────────
+async function loadPayments() {
+  try {
+    const data = await api('GET', '/payment');
+    if (!data.success) return;
+    const list = data.payments;
+
+    document.getElementById('st-payments').textContent = list.length;
+
+    const tbody = document.getElementById('paymentTbody');
+    if (!list.length) {
+      tbody.innerHTML = '<tr><td colspan="7" class="no-data"><div class="nd-icon">💳</div>No payments yet.</td></tr>';
+    } else {
+      tbody.innerHTML = list.map(p => {
+        const forWhat = p.booking_id
+          ? `Darshan — ${p.darshan_name || ''} (${fDate(p.darshan_date)})`
+          : p.room_booking_id
+            ? `Room — ${p.room_type || ''} (${fDate(p.check_in_date)})`
+            : 'Donation';
+        return `
+        <tr>
+          <td style="font-size:0.78rem;font-family:monospace;" class="fw-600">${p.transaction_id || '—'}</td>
+          <td>${fDate(p.payment_date)}</td>
+          <td>${p.booking_id ? 'Darshan' : p.room_booking_id ? 'Room' : 'Donation'}</td>
+          <td style="font-size:0.78rem;max-width:160px;">${forWhat}</td>
+          <td class="fw-700 text-red">${fMoney(p.amount)}</td>
+          <td style="text-transform:capitalize;">${(p.payment_method||'').replace('_',' ')}</td>
+          <td>${badgeBs(p.payment_status)}</td>
+        </tr>`;
+      }).join('');
+    }
+  } catch { console.error('Failed to load payments'); }
+}
+
+// ── DONATIONS ─────────────────────────────────────────────
+async function loadDonations() {
+  try {
+    const data = await api('GET', '/donation');
+    if (!data.success) return;
+    const list = data.donations;
+
+    const total = list.reduce((s,d) => s + Number(d.amount), 0);
+    document.getElementById('st-donations').textContent = fMoney(total);
+
+    const tbody = document.getElementById('donationTbody');
+    if (!list.length) {
+      tbody.innerHTML = '<tr><td colspan="4" class="no-data"><div class="nd-icon">💛</div>No donations yet. <a href="donation.html" style="color:var(--red);">Donate now →</a></td></tr>';
+    } else {
+      tbody.innerHTML = list.map(d => `
+        <tr>
+          <td class="fw-600 text-red">#${d.donation_id}</td>
+          <td>${fDate(d.donation_date)}</td>
+          <td>${d.donation_type || 'General'}</td>
+          <td class="fw-700">${fMoney(d.amount)}</td>
+        </tr>`).join('');
+    }
+  } catch { console.error('Failed to load donations'); }
+}
+
+// ── PROFILE ───────────────────────────────────────────────
+async function loadProfile() {
+  document.getElementById('profileLoading').style.display = 'block';
+  document.getElementById('profileContent').classList.add('d-none');
+  try {
+    const data = await api('GET', '/auth/profile');
+    if (data.success) {
+      const u = data.user;
+      document.getElementById('pName').textContent    = u.name;
+      document.getElementById('pEmail').textContent   = u.email;
+      document.getElementById('pPhone').textContent   = u.phone_number;
+      document.getElementById('pCountry').textContent = u.country;
+      document.getElementById('pAadhar').textContent  = u.aadhar_number
+        ? u.aadhar_number.slice(0,4) + ' **** ' + u.aadhar_number.slice(-4)
+        : '—';
+      document.getElementById('pPassport').textContent = u.passport_number || '—';
+      document.getElementById('pStatus').innerHTML    = badgeBs(u.user_status || 'active');
+      document.getElementById('pSince').textContent   = fDate(u.created_at);
+    }
+  } catch { /* ignore */ } finally {
+    document.getElementById('profileLoading').style.display = 'none';
+    document.getElementById('profileContent').classList.remove('d-none');
+  }
+}
+
+// ── CANCEL MODAL ──────────────────────────────────────────
+function askCancel(type, id, label) {
+  cancelTarget = { type, id };
+  document.getElementById('cancelMsg').textContent =
+    `Are you sure you want to cancel "${label}"? This action cannot be undone.`;
+  document.getElementById('cancelModal').classList.add('show');
+}
+
+function closeModal() {
+  cancelTarget = null;
+  document.getElementById('cancelModal').classList.remove('show');
+}
+
+async function confirmCancel() {
+  if (!cancelTarget) return;
+  btnLoading('confirmCancelBtn', true, 'Cancelling...');
+  try {
+    let data;
+    if (cancelTarget.type === 'darshan') {
+      data = await api('PUT', `/bookings/darshan/${cancelTarget.id}/cancel`);
+    } else {
+      data = await api('PUT', `/bookings/room/${cancelTarget.id}/cancel`);
+    }
+
+    closeModal();
+    if (data && data.success) {
+      await loadAll();
+    } else {
+      alert((data && data.message) || 'Cancellation failed.');
+    }
+  } catch {
+    alert('Network error. Please try again.');
+  } finally {
+    btnLoading('confirmCancelBtn', false, 'Yes, Cancel');
+  }
+}
+
+// Close modal on overlay click
+document.getElementById('cancelModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+</script>
+</body>
+</html>

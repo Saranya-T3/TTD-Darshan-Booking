@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Donate — TTD</title>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+
+<div class="page-hero">
+  <h1>💛 Make a Donation</h1>
+  <p>Support the divine causes of Tirumala Tirupati Devasthanams</p>
+</div>
+
+<section class="section" style="padding:2rem 1rem;">
+  <div class="container">
+    <div class="grid-2" style="align-items:start;gap:2rem;">
+
+      <!-- LEFT: Donation Form -->
+      <div>
+        <div class="form-box" style="width:100%;">
+          <div class="form-title">
+            <span class="icon">🙏</span>
+            <h2>Donate to TTD</h2>
+            <p>Every contribution supports millions of pilgrims</p>
+          </div>
+
+          <div id="alertBox" class="alert"></div>
+          <div id="successBox" class="d-none" style="text-align:center;padding:2rem;">
+            <div style="font-size:3.5rem;margin-bottom:1rem;">🎉</div>
+            <h3 style="font-family:'Cinzel',serif;color:var(--red);margin-bottom:0.5rem;">Thank You!</h3>
+            <p style="color:var(--muted);font-size:0.88rem;margin-bottom:0.5rem;">Your donation has been received.</p>
+            <p style="font-size:0.82rem;color:var(--muted);">Donation ID: <strong id="donId" class="text-red"></strong></p>
+            <p style="margin-top:1.2rem;font-size:1.4rem;color:var(--gold-dk);">ॐ नमो वेङ्कटेशाय 🙏</p>
+            <button class="btn btn-red mt-2" onclick="resetDonation()">Donate Again</button>
+          </div>
+
+          <div id="donateForm">
+            <!-- Quick Amount Buttons -->
+            <div class="f-group">
+              <label>Select Amount</label>
+              <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.6rem;">
+                <button class="btn btn-outline-red btn-sm" onclick="setAmount(108)">₹108</button>
+                <button class="btn btn-outline-red btn-sm" onclick="setAmount(501)">₹501</button>
+                <button class="btn btn-outline-red btn-sm" onclick="setAmount(1001)">₹1,001</button>
+                <button class="btn btn-outline-red btn-sm" onclick="setAmount(5001)">₹5,001</button>
+                <button class="btn btn-outline-red btn-sm" onclick="setAmount(10000)">₹10,000</button>
+              </div>
+            </div>
+
+            <div class="f-group">
+              <label>Enter Amount (₹) <span class="req">*</span></label>
+              <input type="number" id="amount" class="f-ctrl" min="1" placeholder="Enter donation amount" onchange="validateAmount()"/>
+              <div class="f-hint">Minimum donation: ₹1</div>
+            </div>
+
+            <div class="f-group">
+              <label>Donation Type <span class="req">*</span></label>
+              <select id="donationType" class="f-ctrl">
+                <option value="Annadanam">🍲 Annadanam (Free Meals)</option>
+                <option value="Go Samrakshana">🐄 Go Samrakshana (Cow Protection)</option>
+                <option value="Veda Pathasala">📚 Veda Pathasala (Vedic Education)</option>
+                <option value="Temple Maintenance">🛕 Temple Maintenance</option>
+                <option value="General">💛 General Donation</option>
+              </select>
+            </div>
+
+            <div class="f-group">
+              <label>Guest Login Required</label>
+              <div id="loginPrompt" class="d-none" style="background:#fff3cd;border:1px solid #ffc107;border-radius:7px;padding:0.8rem;font-size:0.84rem;color:#664d03;">
+                ⚠️ Please <a href="login.html" style="color:var(--red);font-weight:600;">login</a> or
+                <a href="register.html" style="color:var(--red);font-weight:600;">register</a> to make a donation.
+              </div>
+              <div id="loggedInAs" class="d-none" style="background:#d1e7dd;border:1px solid #badbcc;border-radius:7px;padding:0.7rem;font-size:0.84rem;color:#0a3622;">
+                ✅ Donating as: <strong id="donorName"></strong>
+              </div>
+            </div>
+
+            <button id="donateBtn" class="btn btn-gold btn-block mt-2" onclick="doDonate()">
+              <span class="btn-text">🙏 Donate Now</span>
+              <div class="spin spin-red"></div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Donation Info Cards -->
+      <div style="display:flex;flex-direction:column;gap:1.2rem;">
+
+        <div class="card" style="border-left:4px solid var(--red);">
+          <div style="font-size:2rem;margin-bottom:0.6rem;">🍲</div>
+          <h3 style="color:var(--red);font-size:0.95rem;margin-bottom:0.4rem;">Annadanam</h3>
+          <p style="font-size:0.82rem;color:var(--muted);line-height:1.7;">
+            TTD's Annadanam program feeds over 50,000 pilgrims daily with free sacred prasadam. 
+            Your donation directly supports this noble cause.
+          </p>
+        </div>
+
+        <div class="card" style="border-left:4px solid var(--gold-dk);">
+          <div style="font-size:2rem;margin-bottom:0.6rem;">🐄</div>
+          <h3 style="color:var(--red);font-size:0.95rem;margin-bottom:0.4rem;">Go Samrakshana</h3>
+          <p style="font-size:0.82rem;color:var(--muted);line-height:1.7;">
+            TTD maintains thousands of cows at Gosamrakshana Shalas. Your donation helps care for 
+            these sacred animals and supports traditional cow husbandry.
+          </p>
+        </div>
+
+        <div class="card" style="border-left:4px solid #ff8c00;">
+          <div style="font-size:2rem;margin-bottom:0.6rem;">📚</div>
+          <h3 style="color:var(--red);font-size:0.95rem;margin-bottom:0.4rem;">Veda Pathasala</h3>
+          <p style="font-size:0.82rem;color:var(--muted);line-height:1.7;">
+            TTD runs several Veda Pathasalas to preserve and propagate ancient Vedic knowledge. 
+            Support the education of the next generation of Vedic scholars.
+          </p>
+        </div>
+
+        <div class="card" style="border-left:4px solid var(--green);">
+          <div style="font-size:2rem;margin-bottom:0.6rem;">🛕</div>
+          <h3 style="color:var(--red);font-size:0.95rem;margin-bottom:0.4rem;">Temple Maintenance</h3>
+          <p style="font-size:0.82rem;color:var(--muted);line-height:1.7;">
+            Help maintain the ancient heritage of Sri Venkateswara Temple. Funds go towards 
+            renovation, preservation and upkeep of this sacred site.
+          </p>
+        </div>
+
+        <!-- Donation History -->
+        <div id="historyBox" class="d-none">
+          <h4 style="color:var(--red);font-size:0.9rem;margin-bottom:0.8rem;font-weight:700;">📋 My Donation History</h4>
+          <div id="donationHistory"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand"><h3>🛕 TTD</h3><p>Tirumala Tirupati Devasthanams.</p></div>
+    <div class="footer-col"><h4>Links</h4><ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="darshan.html">Book Darshan</a></li>
+      <li><a href="accommodation.html">Accommodation</a></li>
+    </ul></div>
+  </div>
+  <div class="footer-bottom"><span>© 2025 TTD</span></div>
+</footer>
+
+<script src="js/nav.js"></script>
+<script src="js/main.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const user = getUser();
+  if (user) {
+    document.getElementById('loginPrompt').classList.add('d-none');
+    document.getElementById('loggedInAs').classList.remove('d-none');
+    document.getElementById('donorName').textContent = user.name;
+    loadHistory();
+  } else {
+    document.getElementById('loginPrompt').classList.remove('d-none');
+    document.getElementById('loggedInAs').classList.add('d-none');
+  }
+});
+
+function setAmount(val) {
+  document.getElementById('amount').value = val;
+}
+
+function validateAmount() {
+  const a = parseFloat(document.getElementById('amount').value);
+  if (a < 1 || isNaN(a)) showAlert('alertBox', 'Please enter a valid amount (minimum ₹1).');
+}
+
+async function doDonate() {
+  if (!isLoggedIn()) {
+    showAlert('alertBox', 'Please login to make a donation.');
+    setTimeout(() => location.href = 'login.html', 1500);
+    return;
+  }
+
+  const amount       = parseFloat(document.getElementById('amount').value);
+  const donationType = document.getElementById('donationType').value;
+
+  if (!amount || amount < 1 || isNaN(amount)) return showAlert('alertBox', 'Please enter a valid donation amount (minimum ₹1).');
+
+  btnLoading('donateBtn', true, 'Processing...');
+  try {
+    const data = await api('POST', '/donation', { amount, donation_type: donationType });
+    if (data.success) {
+      document.getElementById('donId').textContent = data.donation_id;
+      document.getElementById('donateForm').classList.add('d-none');
+      document.getElementById('successBox').classList.remove('d-none');
+      loadHistory();
+    } else {
+      showAlert('alertBox', data.message || 'Donation failed. Please try again.');
+    }
+  } catch {
+    showAlert('alertBox', 'Network error. Is backend running?');
+  } finally {
+    btnLoading('donateBtn', false, '🙏 Donate Now');
+  }
+}
+
+async function loadHistory() {
+  try {
+    const data = await api('GET', '/donation');
+    if (data.success && data.donations.length > 0) {
+      const box = document.getElementById('historyBox');
+      const div = document.getElementById('donationHistory');
+      box.classList.remove('d-none');
+      div.innerHTML = data.donations.slice(0, 5).map(d => `
+        <div style="background:var(--white);border:1px solid var(--border);border-radius:8px;padding:0.8rem;margin-bottom:0.6rem;font-size:0.82rem;">
+          <div class="flex-between">
+            <span class="fw-600 text-red">${fMoney(d.amount)}</span>
+            <span class="text-muted">${fDate(d.donation_date)}</span>
+          </div>
+          <div style="color:var(--muted);margin-top:0.2rem;">${d.donation_type}</div>
+        </div>`).join('');
+    }
+  } catch { /* ignore */ }
+}
+
+function resetDonation() {
+  document.getElementById('donateForm').classList.remove('d-none');
+  document.getElementById('successBox').classList.add('d-none');
+  document.getElementById('amount').value = '';
+}
+</script>
+</body>
+</html>

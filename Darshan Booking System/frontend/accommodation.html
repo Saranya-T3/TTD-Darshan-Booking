@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Accommodation — TTD</title>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+
+<div class="page-hero">
+  <h1>🏨 TTD Accommodation</h1>
+  <p>Book comfortable guest rooms near Tirumala temple</p>
+</div>
+
+<section class="section" style="padding:2rem 1rem;">
+  <div class="container">
+
+    <!-- STEP WIZARD -->
+    <div class="steps mb-3">
+      <div class="step active" id="sw1"><div class="step-num">1</div><div class="step-lbl">Choose Room</div></div>
+      <div class="step" id="sw2"><div class="step-num">2</div><div class="step-lbl">Booking Details</div></div>
+      <div class="step" id="sw3"><div class="step-num">3</div><div class="step-lbl">Payment</div></div>
+      <div class="step" id="sw4"><div class="step-num">4</div><div class="step-lbl">Confirmed</div></div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════
+         STEP 1 — Choose Dates + Browse Rooms
+    ══════════════════════════════════════════════════ -->
+    <div id="step1">
+      <div id="alertS1" class="alert"></div>
+
+      <!-- Date Filter Bar -->
+      <div class="form-box wide mb-3" style="width:100%;padding:1.2rem 1.5rem;">
+        <div class="f-row" style="align-items:flex-end;gap:1rem;">
+          <div class="f-group" style="margin:0;">
+            <label>Check-in Date <span class="req">*</span></label>
+            <input type="date" id="checkin" class="f-ctrl" onchange="dateChanged()"/>
+          </div>
+          <div class="f-group" style="margin:0;">
+            <label>Check-out Date <span class="req">*</span></label>
+            <input type="date" id="checkout" class="f-ctrl" onchange="dateChanged()"/>
+          </div>
+          <div>
+            <button class="btn btn-red" onclick="searchRooms()">Search Rooms</button>
+          </div>
+          <div id="nightsInfo" style="font-size:0.84rem;color:var(--muted);padding-bottom:0.2rem;"></div>
+        </div>
+      </div>
+
+      <!-- Room Cards -->
+      <div id="roomsLoading" class="no-data d-none">
+        <div class="nd-icon" style="animation:spin 1s linear infinite;display:inline-block;">⏳</div>
+        <p>Loading rooms...</p>
+      </div>
+      <div id="roomsEmpty" class="no-data d-none">
+        <div class="nd-icon">🏨</div>
+        <p>No rooms available for the selected dates. Please try different dates.</p>
+      </div>
+      <div id="roomsGrid" class="grid-3"></div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════
+         STEP 2 — Booking Details Summary
+    ══════════════════════════════════════════════════ -->
+    <div id="step2" class="d-none">
+      <div class="form-box" style="width:100%;">
+        <div id="alertS2" class="alert"></div>
+        <h3 style="font-family:'Cinzel',serif;color:var(--red);margin-bottom:1.2rem;">Confirm Room Booking</h3>
+
+        <div style="background:#fff9f0;border:1px solid var(--border);border-radius:8px;padding:1.2rem;margin-bottom:1.3rem;font-size:0.84rem;">
+          <div class="flex-between mb-1"><span class="text-muted">Room Type</span><span class="fw-600 text-red" id="bkRoomType"></span></div>
+          <div class="flex-between mb-1"><span class="text-muted">Capacity</span><span class="fw-600" id="bkCapacity"></span></div>
+          <div class="flex-between mb-1"><span class="text-muted">Check-in</span><span class="fw-600" id="bkCheckin"></span></div>
+          <div class="flex-between mb-1"><span class="text-muted">Check-out</span><span class="fw-600" id="bkCheckout"></span></div>
+          <div class="flex-between mb-1"><span class="text-muted">Number of Nights</span><span class="fw-600" id="bkNights"></span></div>
+          <div class="flex-between mb-1"><span class="text-muted">Price per Night</span><span class="fw-600" id="bkPricePerNight"></span></div>
+          <div style="border-top:1px solid var(--border);margin:0.6rem 0;"></div>
+          <div class="flex-between"><span class="fw-700">Total Amount</span><span class="fw-700 text-red" style="font-size:1.1rem;" id="bkTotal"></span></div>
+        </div>
+
+        <div class="f-group">
+          <label>Link to Darshan Booking? (Optional)</label>
+          <select id="linkDarshan" class="f-ctrl">
+            <option value="">— No, standalone room booking —</option>
+          </select>
+          <div class="f-hint">If you have an existing darshan booking you can link them together.</div>
+        </div>
+
+        <div class="flex gap-2 mt-2" style="flex-wrap:wrap;">
+          <button class="btn btn-outline-red" onclick="goStep1()">← Back</button>
+          <button id="confirmRoomBtn" class="btn btn-red" onclick="submitRoomBooking()">
+            <span class="btn-text">Proceed to Payment →</span>
+            <div class="spin" style="border-top-color:white;"></div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════
+         STEP 3 — Payment
+    ══════════════════════════════════════════════════ -->
+    <div id="step3" class="d-none">
+      <div class="form-box" style="width:100%;">
+        <div id="alertS3" class="alert"></div>
+
+        <div class="pay-summary">
+          <h4>Payment Summary</h4>
+          <div class="pay-row"><span>Room Type</span><span id="payRoomType"></span></div>
+          <div class="pay-row"><span>Check-in</span><span id="payCheckin"></span></div>
+          <div class="pay-row"><span>Check-out</span><span id="payCheckout"></span></div>
+          <div class="pay-row"><span>Nights</span><span id="payNights"></span></div>
+          <div class="pay-row total"><span>TOTAL</span><span id="payTotal"></span></div>
+        </div>
+
+        <label style="font-size:0.82rem;font-weight:700;display:block;margin-bottom:0.7rem;">Select Payment Method</label>
+        <div class="pay-methods" id="payMethods">
+          <div class="pay-method" onclick="selMethod('upi',this)"><span class="pm-icon">📱</span>UPI</div>
+          <div class="pay-method" onclick="selMethod('netbanking',this)"><span class="pm-icon">🏦</span>Net Banking</div>
+          <div class="pay-method" onclick="selMethod('debit_card',this)"><span class="pm-icon">💳</span>Debit Card</div>
+          <div class="pay-method" onclick="selMethod('credit_card',this)"><span class="pm-icon">💳</span>Credit Card</div>
+          <div class="pay-method" onclick="selMethod('wallet',this)"><span class="pm-icon">👝</span>Wallet</div>
+        </div>
+
+        <div class="flex gap-2 mt-2" style="flex-wrap:wrap;">
+          <button class="btn btn-outline-red" onclick="goStep2back()">← Back</button>
+          <button id="payBtn" class="btn btn-green" onclick="doPayment()">
+            <span class="btn-text">Pay Now 🔒</span>
+            <div class="spin" style="border-top-color:white;"></div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════
+         STEP 4 — Confirmed
+    ══════════════════════════════════════════════════ -->
+    <div id="step4" class="d-none">
+      <div class="form-box" style="width:100%;text-align:center;">
+        <div style="font-size:4rem;margin-bottom:1rem;">🎉</div>
+        <h2 style="font-family:'Cinzel',serif;color:var(--red);margin-bottom:0.5rem;">Room Booked!</h2>
+        <p style="color:var(--muted);font-size:0.88rem;margin-bottom:1.5rem;">Your accommodation has been confirmed. Carry this confirmation on arrival.</p>
+
+        <div style="background:#fff9f0;border:1px solid var(--border);border-radius:8px;padding:1.2rem;text-align:left;margin-bottom:1.5rem;font-size:0.84rem;">
+          <div class="flex-between mb-1"><span class="text-muted">Transaction ID</span><span class="fw-700 text-red" id="confTxn"></span></div>
+          <div class="flex-between mb-1"><span class="text-muted">Room Type</span><span class="fw-600" id="confRoom"></span></div>
+          <div class="flex-between mb-1"><span class="text-muted">Check-in</span><span class="fw-600" id="confCheckin"></span></div>
+          <div class="flex-between mb-1"><span class="text-muted">Check-out</span><span class="fw-600" id="confCheckout"></span></div>
+          <div class="flex-between"><span class="text-muted">Amount Paid</span><span class="fw-700 text-red" id="confAmount"></span></div>
+        </div>
+
+        <div class="flex gap-2" style="justify-content:center;flex-wrap:wrap;">
+          <a href="dashboard.html" class="btn btn-red">View My Bookings</a>
+          <button class="btn btn-outline-red" onclick="resetAll()">Book Another Room</button>
+        </div>
+        <p style="margin-top:1rem;font-size:1.5rem;color:var(--gold-dk);">ॐ नमो वेङ्कटेशाय 🙏</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand"><h3>🛕 TTD</h3><p>Tirumala Tirupati Devasthanams.</p></div>
+    <div class="footer-col"><h4>Links</h4><ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="darshan.html">Book Darshan</a></li>
+      <li><a href="donation.html">Donate</a></li>
+    </ul></div>
+  </div>
+  <div class="footer-bottom"><span>© 2025 TTD</span></div>
+</footer>
+
+<script src="js/nav.js"></script>
+<script src="js/main.js"></script>
+<script>
+// ── State ─────────────────────────────────────────────────
+let selectedRoom  = null;
+let roomBookData  = {};    // room_booking_id, total_amount
+let selPayMethod  = null;
+let nightsCount   = 0;
+
+// ── Init ─────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+  requireLogin();
+  const today    = new Date();
+  const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1);
+  document.getElementById('checkin').min  = today.toISOString().split('T')[0];
+  document.getElementById('checkout').min = tomorrow.toISOString().split('T')[0];
+
+  // Load darshan bookings for link dropdown
+  try {
+    const data = await api('GET', '/bookings/darshan');
+    if (data.success) {
+      const sel = document.getElementById('linkDarshan');
+      data.bookings
+        .filter(b => b.booking_status === 'confirmed')
+        .forEach(b => {
+          sel.innerHTML += `<option value="${b.booking_id}">
+            ${b.booking_reference} — ${fDate(b.darshan_date)} (${b.darshan_name})
+          </option>`;
+        });
+    }
+  } catch { /* ignore */ }
+
+  // Load all rooms on page load
+  loadRooms();
+});
+
+function dateChanged() {
+  const cin  = document.getElementById('checkin').value;
+  const cout = document.getElementById('checkout').value;
+  if (cin && cout) {
+    const d = Math.ceil((new Date(cout) - new Date(cin)) / 86400000);
+    if (d > 0) {
+      nightsCount = d;
+      document.getElementById('nightsInfo').textContent = `📅 ${d} night${d>1?'s':''}`;
+      document.getElementById('checkout').min = cin;
+    } else {
+      document.getElementById('nightsInfo').textContent = '⚠️ Check-out must be after check-in';
+      nightsCount = 0;
+    }
+  }
+}
+
+async function searchRooms() {
+  const cin  = document.getElementById('checkin').value;
+  const cout = document.getElementById('checkout').value;
+  if (!cin || !cout) return showAlert('alertS1', 'Please select check-in and check-out dates.');
+  if (new Date(cout) <= new Date(cin)) return showAlert('alertS1', 'Check-out must be after check-in.');
+  loadRooms(cin, cout);
+}
+
+async function loadRooms(cin, cout) {
+  document.getElementById('roomsGrid').innerHTML    = '';
+  document.getElementById('roomsEmpty').classList.add('d-none');
+  document.getElementById('roomsLoading').classList.remove('d-none');
+
+  try {
+    let url = '/accommodation';
+    if (cin && cout) url += `?checkin=${cin}&checkout=${cout}`;
+    const data = await api('GET', url);
+
+    document.getElementById('roomsLoading').classList.add('d-none');
+
+    if (!data.success || !data.rooms.length) {
+      document.getElementById('roomsEmpty').classList.remove('d-none');
+      return;
+    }
+
+    const nights = nightsCount || 1;
+    const grid   = document.getElementById('roomsGrid');
+    grid.innerHTML = '';
+
+    const icons = { 'Standard Room': '🛏️', 'Deluxe Room': '🏡', 'Suite Room': '👑' };
+
+    data.rooms.forEach(r => {
+      const total    = r.price_per_day * nights;
+      const avail    = r.is_available;
+      grid.innerHTML += `
+        <div class="room-card">
+          <div class="room-img">
+            ${icons[r.room_type] || '🏨'}
+            <div class="room-ribbon">${r.room_type.split(' ')[0]}</div>
+          </div>
+          <div class="room-body">
+            <h3>${r.room_type}</h3>
+            <div class="cap">👥 Up to ${r.capacity} person${r.capacity>1?'s':''}</div>
+            <div style="font-size:0.78rem;color:var(--muted);margin-bottom:0.4rem;">
+              ✅ AC &nbsp;|&nbsp; 📺 TV &nbsp;|&nbsp; 🛁 Attached Bath
+            </div>
+            ${avail
+              ? `<div style="font-size:0.75rem;color:var(--green);font-weight:600;margin-bottom:0.4rem;">✅ Available</div>`
+              : `<div style="font-size:0.75rem;color:var(--danger);font-weight:600;margin-bottom:0.4rem;">❌ Not Available for selected dates</div>`
+            }
+            <div class="room-price-row">
+              <div class="room-price">
+                ${fMoney(r.price_per_day)} <small>/night</small>
+                ${nights > 1 ? `<div style="font-size:0.78rem;color:var(--muted);">Total: ${fMoney(total)} for ${nights} nights</div>` : ''}
+              </div>
+              ${avail
+                ? `<button class="btn btn-red btn-sm" onclick='pickRoom(${JSON.stringify(r)})'>Book Now</button>`
+                : `<button class="btn btn-sm" style="background:#ccc;color:#666;cursor:not-allowed;" disabled>Unavailable</button>`
+              }
+            </div>
+          </div>
+        </div>`;
+    });
+  } catch {
+    document.getElementById('roomsLoading').classList.add('d-none');
+    showAlert('alertS1', 'Failed to load rooms. Is backend running?');
+  }
+}
+
+function pickRoom(room) {
+  const cin  = document.getElementById('checkin').value;
+  const cout = document.getElementById('checkout').value;
+  if (!cin || !cout) return showAlert('alertS1', 'Please select check-in and check-out dates first, then click Search Rooms.');
+
+  selectedRoom = room;
+  const nights = nightsCount || 1;
+
+  document.getElementById('bkRoomType').textContent     = room.room_type;
+  document.getElementById('bkCapacity').textContent     = `Up to ${room.capacity} person${room.capacity>1?'s':''}`;
+  document.getElementById('bkCheckin').textContent      = fDate(cin);
+  document.getElementById('bkCheckout').textContent     = fDate(cout);
+  document.getElementById('bkNights').textContent       = nights + ' night' + (nights>1?'s':'');
+  document.getElementById('bkPricePerNight').textContent= fMoney(room.price_per_day);
+  document.getElementById('bkTotal').textContent        = fMoney(room.price_per_day * nights);
+  setStep(2);
+}
+
+function setStep(n) {
+  [1,2,3,4].forEach(i => {
+    document.getElementById('step' + i).classList.toggle('d-none', i !== n);
+    const sw = document.getElementById('sw' + i);
+    sw.classList.remove('active','done');
+    if (i < n)  sw.classList.add('done');
+    if (i === n) sw.classList.add('active');
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function goStep1()     { setStep(1); }
+function goStep2back() { setStep(2); }
+
+async function submitRoomBooking() {
+  if (!requireLogin()) return;
+
+  const cin       = document.getElementById('checkin').value;
+  const cout      = document.getElementById('checkout').value;
+  const bookingId = document.getElementById('linkDarshan').value || null;
+
+  btnLoading('confirmRoomBtn', true, 'Creating Booking...');
+  try {
+    const data = await api('POST', '/bookings/room', {
+      room_id:        selectedRoom.room_id,
+      check_in_date:  cin,
+      check_out_date: cout,
+      booking_id:     bookingId || null
+    });
+
+    if (data.success) {
+      roomBookData = data;
+      const nights = data.nights || nightsCount;
+      document.getElementById('payRoomType').textContent = selectedRoom.room_type;
+      document.getElementById('payCheckin').textContent  = fDate(cin);
+      document.getElementById('payCheckout').textContent = fDate(cout);
+      document.getElementById('payNights').textContent   = nights + ' night' + (nights>1?'s':'');
+      document.getElementById('payTotal').textContent    = fMoney(data.total_amount);
+      setStep(3);
+    } else {
+      showAlert('alertS2', data.message || 'Room booking failed.');
+    }
+  } catch {
+    showAlert('alertS2', 'Network error. Please try again.');
+  } finally {
+    btnLoading('confirmRoomBtn', false, 'Proceed to Payment →');
+  }
+}
+
+function selMethod(method, el) {
+  selPayMethod = method;
+  document.querySelectorAll('.pay-method').forEach(e => e.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+async function doPayment() {
+  if (!requireLogin()) return;
+  if (!selPayMethod) return showAlert('alertS3', 'Please select a payment method.');
+
+  btnLoading('payBtn', true, 'Processing...');
+  try {
+    const data = await api('POST', '/payment', {
+      room_booking_id: roomBookData.room_booking_id,
+      amount:          roomBookData.total_amount,
+      payment_method:  selPayMethod
+    });
+
+    if (data.success) {
+      document.getElementById('confTxn').textContent     = data.transaction_id;
+      document.getElementById('confRoom').textContent    = selectedRoom.room_type;
+      document.getElementById('confCheckin').textContent = fDate(document.getElementById('checkin').value);
+      document.getElementById('confCheckout').textContent= fDate(document.getElementById('checkout').value);
+      document.getElementById('confAmount').textContent  = fMoney(roomBookData.total_amount);
+      setStep(4);
+    } else {
+      showAlert('alertS3', data.message || 'Payment failed.');
+    }
+  } catch {
+    showAlert('alertS3', 'Payment error. Please try again.');
+  } finally {
+    btnLoading('payBtn', false, 'Pay Now 🔒');
+  }
+}
+
+function resetAll() {
+  selectedRoom = null; roomBookData = {}; selPayMethod = null; nightsCount = 0;
+  document.getElementById('checkin').value  = '';
+  document.getElementById('checkout').value = '';
+  document.getElementById('nightsInfo').textContent = '';
+  document.getElementById('roomsGrid').innerHTML    = '';
+  setStep(1);
+  loadRooms();
+}
+</script>
+</body>
+</html>

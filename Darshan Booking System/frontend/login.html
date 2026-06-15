@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Login — TTD</title>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+
+<section class="section" style="min-height:calc(100vh - 67px);display:flex;align-items:center;padding:2rem 1rem;">
+  <div class="form-box" style="width:100%;">
+    <div class="form-title">
+      <span class="icon">🛕</span>
+      <h2>Welcome Back</h2>
+      <p>Login to your TTD pilgrim account</p>
+    </div>
+
+    <div id="alertBox" class="alert"></div>
+
+    <div class="f-group">
+      <label>Email Address <span class="req">*</span></label>
+      <input type="email" id="email" class="f-ctrl" placeholder="your@email.com"/>
+    </div>
+
+    <div class="f-group">
+      <label>Password <span class="req">*</span></label>
+      <div style="position:relative;">
+        <input type="password" id="password" class="f-ctrl" placeholder="Your password" style="padding-right:2.5rem;"/>
+        <button id="togglePwd" type="button" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:1rem;color:var(--muted);">👁</button>
+      </div>
+    </div>
+
+    <button id="loginBtn" class="btn btn-red btn-block mt-2" onclick="doLogin()">
+      <span class="btn-text">Login</span>
+      <div class="spin" style="border-top-color:white;"></div>
+    </button>
+
+    <p class="text-center mt-2" style="font-size:0.84rem;color:var(--muted);">
+      Don't have an account?
+      <a href="register.html" style="color:var(--red);font-weight:600;">Register here</a>
+    </p>
+  </div>
+</section>
+
+<script src="js/nav.js"></script>
+<script src="js/main.js"></script>
+<script>
+  if (isLoggedIn()) location.href = 'dashboard.html';
+
+  document.getElementById('togglePwd').onclick = function() {
+    const p = document.getElementById('password');
+    p.type  = p.type === 'password' ? 'text' : 'password';
+    this.textContent = p.type === 'password' ? '👁' : '🙈';
+  };
+
+  document.getElementById('password').addEventListener('keypress', e => {
+    if (e.key === 'Enter') doLogin();
+  });
+
+  async function doLogin() {
+    const email    = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+
+    if (!email || !password) return showAlert('alertBox', 'Please enter email and password.');
+
+    btnLoading('loginBtn', true, 'Logging in...');
+    try {
+      const data = await api('POST', '/auth/login', { email, password });
+      if (data.success) {
+        saveAuth(data.token, data.user);
+        showAlert('alertBox', 'Login successful! Redirecting...', 'success');
+        setTimeout(() => location.href = 'dashboard.html', 900);
+      } else {
+        showAlert('alertBox', data.message || 'Login failed.');
+      }
+    } catch {
+      showAlert('alertBox', 'Cannot reach server. Is backend running?');
+    } finally {
+      btnLoading('loginBtn', false, 'Login');
+    }
+  }
+</script>
+</body>
+</html>

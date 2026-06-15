@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Register — TTD</title>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+
+<section class="section" style="padding:2rem 1rem;">
+  <div class="form-box wide" style="width:100%;">
+    <div class="form-title">
+      <span class="icon">🛕</span>
+      <h2>Create Pilgrim Account</h2>
+      <p>Register to book darshan tickets and accommodation</p>
+    </div>
+
+    <div id="alertBox" class="alert"></div>
+
+    <div class="f-row">
+      <div class="f-group">
+        <label>Full Name <span class="req">*</span></label>
+        <input type="text" id="name" class="f-ctrl" placeholder="Name as on Aadhar/Passport"/>
+      </div>
+      <div class="f-group">
+        <label>Email Address <span class="req">*</span></label>
+        <input type="email" id="email" class="f-ctrl" placeholder="your@email.com"/>
+      </div>
+    </div>
+
+    <div class="f-row">
+      <div class="f-group">
+        <label>Phone Number <span class="req">*</span></label>
+        <input type="tel" id="phone" class="f-ctrl" placeholder="+91 XXXXX XXXXX"/>
+      </div>
+      <div class="f-group">
+        <label>Country</label>
+        <select id="country" class="f-ctrl" onchange="toggleIdType()">
+          <option value="India">India</option>
+          <option value="USA">USA</option>
+          <option value="UK">UK</option>
+          <option value="Canada">Canada</option>
+          <option value="Australia">Australia</option>
+          <option value="Singapore">Singapore</option>
+          <option value="UAE">UAE</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Indian ID -->
+    <div id="aadharField" class="f-group">
+      <label>Aadhar Number <span class="req">*</span></label>
+      <input type="text" id="aadhar" class="f-ctrl" maxlength="12" placeholder="12-digit Aadhar number"/>
+      <div class="f-hint">Required for Indian citizens. Must be exactly 12 digits.</div>
+    </div>
+
+    <!-- NRI ID -->
+    <div id="passportField" class="f-group d-none">
+      <label>Passport Number <span class="req">*</span></label>
+      <input type="text" id="passport" class="f-ctrl" placeholder="e.g. A1234567" maxlength="8"/>
+      <div class="f-hint">Format: 1 capital letter followed by 7 digits (e.g. A1234567)</div>
+    </div>
+
+    <div class="f-row">
+      <div class="f-group">
+        <label>Password <span class="req">*</span></label>
+        <input type="password" id="password" class="f-ctrl" placeholder="Minimum 6 characters"/>
+      </div>
+      <div class="f-group">
+        <label>Confirm Password <span class="req">*</span></label>
+        <input type="password" id="cpassword" class="f-ctrl" placeholder="Re-enter password"/>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:0.6rem;align-items:flex-start;margin-bottom:1.2rem;">
+      <input type="checkbox" id="terms" style="margin-top:3px;"/>
+      <label for="terms" style="font-size:0.82rem;color:var(--muted);cursor:pointer;">
+        I confirm that the information provided is accurate and agree to TTD's terms and conditions.
+      </label>
+    </div>
+
+    <button id="regBtn" class="btn btn-red btn-block" onclick="doRegister()">
+      <span class="btn-text">Create Account</span>
+      <div class="spin" style="border-top-color:white;"></div>
+    </button>
+
+    <p class="text-center mt-2" style="font-size:0.84rem;color:var(--muted);">
+      Already have an account? <a href="login.html" style="color:var(--red);font-weight:600;">Login here</a>
+    </p>
+  </div>
+</section>
+
+<script src="js/nav.js"></script>
+<script src="js/main.js"></script>
+<script>
+  if (isLoggedIn()) location.href = 'dashboard.html';
+
+  function toggleIdType() {
+    const isIndia = document.getElementById('country').value === 'India';
+    document.getElementById('aadharField').classList.toggle('d-none', !isIndia);
+    document.getElementById('passportField').classList.toggle('d-none', isIndia);
+  }
+
+  async function doRegister() {
+    const name     = document.getElementById('name').value.trim();
+    const email    = document.getElementById('email').value.trim();
+    const phone    = document.getElementById('phone').value.trim();
+    const country  = document.getElementById('country').value;
+    const aadhar   = document.getElementById('aadhar').value.trim();
+    const passport = document.getElementById('passport').value.trim().toUpperCase();
+    const password = document.getElementById('password').value;
+    const cpass    = document.getElementById('cpassword').value;
+    const terms    = document.getElementById('terms').checked;
+
+    if (!name || !email || !phone || !password) return showAlert('alertBox', 'Name, email, phone and password are required.');
+    if (country === 'India' && aadhar.length !== 12) return showAlert('alertBox', 'Aadhar number must be exactly 12 digits.');
+    if (country === 'India' && !/^\d{12}$/.test(aadhar)) return showAlert('alertBox', 'Aadhar must contain only digits.');
+    if (country !== 'India' && !passport) return showAlert('alertBox', 'Passport number is required.');
+    if (country !== 'India' && !/^[A-Z][0-9]{7}$/.test(passport)) return showAlert('alertBox', 'Passport must be 1 capital letter + 7 digits (e.g. A1234567).');
+    if (password.length < 6) return showAlert('alertBox', 'Password must be at least 6 characters.');
+    if (password !== cpass)  return showAlert('alertBox', 'Passwords do not match.');
+    if (!terms) return showAlert('alertBox', 'Please agree to the terms and conditions.');
+
+    const body = {
+      name, email, phone_number: phone, country, password,
+      aadhar_number:   country === 'India' ? aadhar   : null,
+      passport_number: country !== 'India' ? passport : null
+    };
+
+    btnLoading('regBtn', true, 'Creating Account...');
+    try {
+      const data = await api('POST', '/auth/register', body);
+      if (data.success) {
+        showAlert('alertBox', 'Account created! Redirecting to login...', 'success');
+        setTimeout(() => location.href = 'login.html', 1500);
+      } else {
+        showAlert('alertBox', data.message || 'Registration failed.');
+      }
+    } catch {
+      showAlert('alertBox', 'Cannot reach server. Is backend running?');
+    } finally {
+      btnLoading('regBtn', false, 'Create Account');
+    }
+  }
+</script>
+</body>
+</html>
